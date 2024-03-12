@@ -4,4 +4,4 @@ So far the objective is to cover a few option types and to optimize code to the 
 
 
 It is first and foremost a personal project I undertake for skill improvement. 
-However, if you have any comment or suggestion, feel free to open an issue or a pull request.
+However, if you have any comment or suggestion, feel free to open an issue.
