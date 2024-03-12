@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class EuropeanOption_CRR:
     """
     A class to represent an European option priced using the Cox-Ross-Rubinstein (CRR) binomial tree method.
@@ -102,7 +101,7 @@ class EuropeanOption_CRR:
         option_tree : numpy.ndarray
             A 2D array representing the entire binomial tree of option values.
         """
-        # calculated constants
+        # calculate constants
         dt = self.T / self.N  # time intervals
         u = np.exp(self.sigma * np.sqrt(dt))  # up factor
         d = np.exp(-self.sigma * np.sqrt(dt))  # down factor
@@ -110,17 +109,13 @@ class EuropeanOption_CRR:
         q = (np.exp(self.r*dt) - d) / (u - d)
         N = self.N + 1
 
-        # initialize arrays to store stock prices and option values
-        stock_tree = np.zeros((N, N))
+        # initialize array to store option values
         option_tree = np.zeros((N, N))
 
-        # initialize the first stock price
-        stock_tree[0, 0] = self.S0
-
-        # compute stock prices at each node
-        for n in range(1, N):
-            stock_tree[n, :n] = stock_tree[n-1, :n] * u
-            stock_tree[n, n] = stock_tree[n-1, n-1] * d
+        # generate the stock price tree
+        tri_mask = np.tri(N, N, dtype=bool)
+        stock_tree = np.where(tri_mask, self.S0 * (u ** np.arange(N)[:, None]) * (d ** (
+            (np.concatenate((np.arange(N)[:1], np.arange(N)[1:]*2))[None, :])[None, :])), 0).squeeze()
 
         # compute option values at maturity
         if self.opt_type == "Call":
@@ -129,10 +124,9 @@ class EuropeanOption_CRR:
             option_tree[-1, :] = np.maximum(self.K - stock_tree[-1, :], 0)
 
         # compute option values at each previous node using backward induction
-        for j in range(N-2, -1, -1):
-            for i in range(j+1):
-                option_tree[j, i] = np.exp(-self.r * dt) * (
-                    q * option_tree[j+1, i] + (1 - q) * option_tree[j+1, i+1])
+        for j in range(N-2, -1, -1):  # Update the range
+            option_tree[j, :j+1] = np.exp(-self.r * dt) * (
+                q * option_tree[j+1, :j+1] + (1 - q) * option_tree[j+1, 1:j+2])
 
         option_price = option_tree[0, 0]
         return option_price, stock_tree, option_tree
@@ -250,3 +244,4 @@ class EuropeanOption_CRR:
               f"{'Risk Free Rate':<30} {self.r}\n" +
               f"{'Volatility':<30} {self.sigma}\n" +
               f"{'Tree Sub Periods':<30} {self.N}\n")
+
