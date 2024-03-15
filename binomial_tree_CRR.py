@@ -219,13 +219,13 @@ class Option_CRR:
 
     def _print_summary_metrics(self):
         """
-        Print a summary of option metrics along with the input parameters.
+        Print a summary of option metrics.
 
         The summary includes the option price, delta, gamma, vega, theta, and rho.
         """
 
         print("\n" +
-              f"European {self.opt_type} summary metrics - CCR Binomial Tree\n" +
+              f"{self.opt_style} {self.opt_type} summary metrics - CCR Binomial Tree\n" +
               "\n" +
               f"{'Option Price':<15} {self.option_price:.4f}\n" +
               f"{'Delta':<15} {self.delta:.4f}\n" +
@@ -243,7 +243,7 @@ class Option_CRR:
         self._calculate_option_price_and_greeks()
 
         print("\n" +
-              f"European {self.opt_type} summary metrics - CCR Binomial Tree\n" +
+              f"{self.opt_style} {self.opt_type} summary metrics - CCR Binomial Tree\n" +
               "\n" +
               f"{'Option Price':<15} {self.option_price:.4f}\n" +
               f"{'Delta':<15} {self.delta:.4f}\n" +
@@ -258,7 +258,7 @@ class Option_CRR:
         """
 
         print("\n" +
-              f"European {self.opt_type} input parameters\n" +
+              f"{self.opt_style} {self.opt_type} input parameters\n" +
               "\n" +
               f"{'Underlying Price':<30} {self.S0}\n" +
               f"{'Strike Price':<30} {self.K}\n" +
