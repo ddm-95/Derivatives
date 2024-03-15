@@ -1,8 +1,9 @@
 import numpy as np
 
-class EuropeanOption_CRR:
+
+class Option_CRR:
     """
-    A class to represent an European option priced using the Cox-Ross-Rubinstein (CRR) binomial tree method.
+    A class to represent European or American options priced using the Cox-Ross-Rubinstein (CRR) binomial tree method.
 
     Attributes
     -----------
@@ -20,6 +21,8 @@ class EuropeanOption_CRR:
         Number of time steps in the binomial tree.
     opt_type : str, optional
         Type of the option, 'Call' or 'Put'. Default is 'Call'.
+    opt_style : str, optional
+        Style of the option, 'European' or 'American'. Default is 'European'.
     vol_shift : float, optional
         Volatility shift used for vega calculation. Default is 0.01.
     r_shift : float, optional
@@ -33,11 +36,13 @@ class EuropeanOption_CRR:
         Calculates the option's price and the option's and the underlying's price trees.
     _calculate_greeks
         Calculates the Greeks of the option.
+    get_summary_metrics
+        Runs price_and_greeks and prints a summary of option metrics.
     summary_metrics
         Prints a summary of option metrics along with the input parameters.
     """
 
-    def __init__(self, S0, K, T, r, sigma, N, opt_type="Call", vol_shift=0.01, r_shift=0.01):
+    def __init__(self, S0, K, T, r, sigma, N, opt_type="Call", opt_style="European", vol_shift=0.01, r_shift=0.01):
         self.S0 = S0
         self.K = K
         self.T = T
@@ -45,6 +50,7 @@ class EuropeanOption_CRR:
         self.sigma = sigma
         self.N = N
         self.opt_type = opt_type
+        self.opt_style = opt_style
         self.vol_shift = vol_shift
         self.r_shift = r_shift
 
@@ -124,9 +130,25 @@ class EuropeanOption_CRR:
             option_tree[-1, :] = np.maximum(self.K - stock_tree[-1, :], 0)
 
         # compute option values at each previous node using backward induction
-        for j in range(N-2, -1, -1):  # Update the range
-            option_tree[j, :j+1] = np.exp(-self.r * dt) * (
-                q * option_tree[j+1, :j+1] + (1 - q) * option_tree[j+1, 1:j+2])
+        if self.opt_style == "European":
+            for j in range(N-2, -1, -1):  # Update the range
+                option_tree[j, :j+1] = np.exp(-self.r * dt) * (
+                    q * option_tree[j+1, :j+1] + (1 - q) * option_tree[j+1, 1:j+2])
+
+        else:
+            # compute option values at each previous node using backward induction taking early exercise into account
+            for j in range(N-2, -1, -1):  # Loop backwards through the lines
+                option_tree[j, :j+1] = np.exp(-self.r * dt) * (
+                    q * option_tree[j+1, :j+1] + (1 - q) * option_tree[j+1, 1:j+2])
+
+                # Compute payoff from early exercise
+                if self.opt_type == "Call":
+                    intrinsic_values = stock_tree[j, :j+1] - self.K
+                else:
+                    intrinsic_values = self.K - stock_tree[j, :j+1]
+                # Update the
+                option_tree[j, :j +
+                            1] = np.maximum(option_tree[j, :j+1], intrinsic_values)
 
         option_price = option_tree[0, 0]
         return option_price, stock_tree, option_tree
@@ -214,7 +236,7 @@ class EuropeanOption_CRR:
 
     def get_summary_metrics(self):
         """
-        Re run the calculations and print a summary of option metrics along with the input parameters.
+        Run the price and greeks calculations and print a summary of option metrics.
 
         The summary includes the option price, delta, gamma, vega, theta, and rho.
         """
@@ -244,4 +266,3 @@ class EuropeanOption_CRR:
               f"{'Risk Free Rate':<30} {self.r}\n" +
               f"{'Volatility':<30} {self.sigma}\n" +
               f"{'Tree Sub Periods':<30} {self.N}\n")
-
