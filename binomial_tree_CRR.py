@@ -64,8 +64,6 @@ class Option_CRR:
         self._stock_tree = None
         self._option_tree = None
 
-        self._calculate_option_price_and_greeks()
-
     def _calculate_option_price_and_greeks(self):
         """
         Calculate the option price and Greeks using the CRR binomial tree method.
@@ -266,3 +264,4 @@ class Option_CRR:
               f"{'Risk Free Rate':<30} {self.r}\n" +
               f"{'Volatility':<30} {self.sigma}\n" +
               f"{'Tree Sub Periods':<30} {self.N}\n")
+
