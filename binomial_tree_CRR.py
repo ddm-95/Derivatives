@@ -118,8 +118,8 @@ class Option_CRR:
 
         # generate the stock price tree
         tri_mask = np.tri(N, N, dtype=bool)
-        stock_tree = np.where(tri_mask, self.S0 * (u ** np.arange(N)[:, None]) * (d ** (
-            (np.concatenate((np.arange(N)[:1], np.arange(N)[1:]*2))[None, :])[None, :])), 0).squeeze()
+        stock_tree = np.where(tri_mask, self.S0 * (u ** np.arange(N)
+                                                   [:, None]) * (d ** (np.arange(N)[None, :]*2)), 0)
 
         # compute option values at maturity
         if self.opt_type == "Call":
@@ -264,4 +264,23 @@ class Option_CRR:
               f"{'Risk Free Rate':<30} {self.r}\n" +
               f"{'Volatility':<30} {self.sigma}\n" +
               f"{'Tree Sub Periods':<30} {self.N}\n")
+
+
+# Testing
+if __name__ == "__main__":
+
+    call_eu = Option_CRR(
+        50, 50, 1, 0.06, 0.2, 100, opt_type="Call", opt_style="European", vol_shift=0.01, r_shift=0.01)
+    put_eu = Option_CRR(
+        50, 50, 1, 0.06, 0.2, 100, opt_type="Put", opt_style="European", vol_shift=0.01, r_shift=0.01)
+    call_am = Option_CRR(
+        50, 50, 1, 0.06, 0.2, 100, opt_type="Call", opt_style="American", vol_shift=0.01, r_shift=0.01)
+    put_am = Option_CRR(
+        50, 50, 1, 0.06, 0.2, 100, opt_type="Put", opt_style="American", vol_shift=0.01, r_shift=0.01)
+
+    call_eu.get_summary_metrics()
+    put_eu.get_summary_metrics()
+    call_am.get_summary_metrics()
+    put_am.get_summary_metrics()
+
 
